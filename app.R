@@ -10,46 +10,70 @@ rm(list = ls())
 
 ### SETUP ######################################
 source("datamanagement.R")
-source("fn_actRiskByRegion.R")
+source("fn_actRiskSplit.R")
 source("fn_topStats.R")
 source("fn_topCont.R")
+source("fn_mVaR.R")
 
 ################################################
 
 ui <- fluidPage(theme=shinytheme("cosmo"),
                 titlePanel("Example of interactive dashboard"),
-                sidebarLayout(
-                  sidebarPanel(
-                    selectInput("Delegate", "Select the portfolio", delFrame$delName, multiple = F,
-                                selected = "EU EQ IN"),
-                    dateInput("Date", "Select the date", value = max(dataSet$ReportDate), format = "dd-M-yy"),
-                    actionButton("button", "Refresh")
-                  ), 
-                  
+                  fluidRow(column(4, 
+                                  selectInput("Delegate", "Select the portfolio", delFrame$delName, multiple = F,
+                                              selected = "EU EQ IN"),
+                                  #actionButton("button", "Refresh"),
+                  ),
+                  column(4,
+                         dateInput("Date", "Select the date", value = max(dataSet$ReportDate), format = "dd-M-yy")
+                         ),
+                  column(4, 
+                         radioButtons("Split", "Grouping by:",
+                                      c("Region" = "Region",
+                                        "Country" = "CtryName",
+                                        "Developed" = "MSCI_DC",
+                                        "CCY" = "Crncy",
+                                        "Sector" = "Sector",
+                                        "GICS Sector" = "GICSSectorName",
+                                        "GICS Industry" = "GICSIndustryName",
+                                        "SecurityType" = "SecurityType",
+                                        "Market Cap" = "MktCap"), selected = "Region")
+                         ))
+                    , 
                   mainPanel(
                     tabsetPanel(
                       type = "tabs",
                       tabPanel("Holdings details", 
                                #textOutput("test"),
-                               plotOutput("actRiskRegion"),
+                               plotOutput("actRiskSplit"),
                                tableOutput("topContr")),
                       tabPanel("Top details",
                                plotOutput("histRisk"),
-                               plotOutput("histFac"))
+                               plotOutput("histFac")),
+                      tabPanel("Marginal VaR",
+                               uiOutput("mVaR1"),
+                               uiOutput("mVaR2"),
+                               tableOutput("mVaR"))
                   )
-                )
                 )
 )
 
 server <- function(input, output, session) {
-  #output$test <- renderText(nrow(fn_topCont(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)))
+  #output$test <- renderText(input$Split)
+  
+  output$mVaR1 <- renderText(HTML(paste("<b>MarginalVaRMCPort</b> measures the change in total VaR",
+                   "from taking an additional dollar of exposure (x100)",
+                   "to a given security.")))
+  
+  output$mVaR2 <- renderText(HTML(paste("<b>PartialVaRMCPort</b> measures the change in total VaR",
+                   "from completely removing the position.")))
   
   output$topContr <- renderTable({
     fn_topCont(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
-    }, width = "60%")
+    }, width = "100%")
   
-  output$actRiskRegion <- renderPlot({
-    fn_actRiskByRegion(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+  output$actRiskSplit <- renderPlot({
+    fn_actRiskSplit(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date, input$Split)
   })
   
   output$histRisk <- renderPlot({
@@ -60,6 +84,9 @@ server <- function(input, output, session) {
     fn_topStats(delFrame$Delegate[delFrame$delName == input$Delegate])[2]
   })
   
+  output$mVaR <- renderTable({
+    fn_mVaR(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+  }, width = "100%")
   
 }
 
