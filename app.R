@@ -14,20 +14,21 @@ source("fn_actRiskSplit.R")
 source("fn_topStats.R")
 source("fn_topCont.R")
 source("fn_mVaR.R")
+source("fn_fundamentals.R")
 
 ################################################
 
 ui <- fluidPage(theme=shinytheme("cosmo"),
                 titlePanel("Example of interactive dashboard"),
-                  fluidRow(column(4, 
+                  fluidRow(column(2, 
                                   selectInput("Delegate", "Select the portfolio", delFrame$delName, multiple = F,
                                               selected = "EU EQ IN"),
                                   #actionButton("button", "Refresh"),
                   ),
-                  column(4,
+                  column(2,
                          dateInput("Date", "Select the date", value = max(dataSet$ReportDate), format = "dd-M-yy")
                          ),
-                  column(4, 
+                  column(3, 
                          radioButtons("Split", "Grouping by:",
                                       c("Region" = "Region",
                                         "Country" = "CtryName",
@@ -53,7 +54,9 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                       tabPanel("Marginal VaR",
                                uiOutput("mVaR1"),
                                uiOutput("mVaR2"),
-                               tableOutput("mVaR"))
+                               tableOutput("mVaR")),
+                      tabPanel("Fundamentals",
+                               plotOutput("fundChart"))
                   )
                 )
 )
@@ -87,6 +90,10 @@ server <- function(input, output, session) {
   output$mVaR <- renderTable({
     fn_mVaR(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
   }, width = "100%")
+  
+  output$fundChart <- renderPlot({
+    fn_fundamentals(delFrame$Delegate[delFrame$delName == input$Delegate])
+  })
   
 }
 

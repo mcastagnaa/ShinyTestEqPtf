@@ -18,5 +18,5 @@ factMap <- data.frame(Factors = c("Factor", "NonFactor",
                                   "Style", "Country", "Industry", "Greeks"),
                       Group = c(rep("A-Main", 2), rep("B-AssetClass",5), rep("C-FixedIncome",2), 
                                 rep("C-Equity",4)),
-                      stringsAsFactors = T)
+                      stringsAsFactors = F) 
 
