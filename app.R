@@ -2,8 +2,6 @@ library(shiny)
 library(shinythemes)
 library(dplyr)
 library(tidyr)
-library(janitor)
-library(openxlsx)
 library(ggplot2)
 
 rm(list = ls())
@@ -15,6 +13,7 @@ source("fn_topStats.R")
 source("fn_topCont.R")
 source("fn_mVaR.R")
 source("fn_fundamentals.R")
+source("fn_quintiles.R")
 
 ################################################
 
@@ -56,7 +55,8 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                uiOutput("mVaR2"),
                                tableOutput("mVaR")),
                       tabPanel("Fundamentals",
-                               plotOutput("fundChart"))
+                               plotOutput("fundChart"),
+                               plotOutput("quintiles"))
                   )
                 )
 )
@@ -95,6 +95,9 @@ server <- function(input, output, session) {
     fn_fundamentals(delFrame$Delegate[delFrame$delName == input$Delegate])
   })
   
+  output$quintiles <- renderPlot({
+    fn_quintiles(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+  })
 }
 
 shinyApp(ui = ui, server = server)
