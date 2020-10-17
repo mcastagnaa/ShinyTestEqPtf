@@ -14,7 +14,7 @@ fn_actRiskSplit <- function(delCode, date, split) {
               actRiskCtb = sum(ContributionDiff, na.rm = T)) %>%
     pivot_longer(-all_of(split), names_to = "Dimension") %>%
     mutate(value = value/100) %>%
-    ggplot(aes_string(x = split, y = "value")) +
+    ggplot(aes_string(x = as.character(split), y = "value")) +
     geom_bar(stat = "identity", position = "dodge") +
     facet_wrap(~Dimension, nrow = 1) +
     theme_bw() +

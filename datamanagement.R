@@ -7,6 +7,7 @@ dataSet <- holdSet %>%
          MktCap = ifelse(MarketCapPort == 0, MarketCapBench, MarketCapPort),
          MktCap = cut(MktCap, breaks = c(0, 1500, 8500, 40000, +Inf), labels = c("Small", "Mid", "Big", "Mega"))) %>%
   left_join(geoMap, by = c("CntryRisk" = "ISO2")) %>%
+  mutate(MSCI_DC = ifelse(MSCI_DC==1, "DEVELOPED", "EMERGING/FRONTIER")) %>%
   left_join(secTypeMap, by = "SecurityType") %>%
   select(-starts_with("update"))
 
