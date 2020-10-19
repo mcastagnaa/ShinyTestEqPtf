@@ -23,14 +23,14 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                 #               titlePanel("Example of interactive dashboard"),
                 #               top = 0, left = "10%", height = "30%", width = "100%", fixed = T,
                     fluidRow(
-                      column(2, 
-                             selectInput("Delegate", "Select the portfolio", delFrame$delName, multiple = F,
-                                         selected = "EU EQ IN"),
+                      column(3, 
+                             selectInput("Delegate", "Select the portfolio", dropDownSel$Name, multiple = F,
+                                         selected = "Equity EU Income"),
                     ),
                     column(2,
                            dateInput("Date", "Select the date", value = max(dataSet$ReportDate), format = "dd-M-yy")
                     ),
-                    column(3, 
+                     column(3, 
                            radioButtons("Split", "Grouping by:",
                                         c("Region" = "Region",
                                           "Country" = "CtryName",
@@ -40,8 +40,13 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                           "GICS Sector" = "GICSSectorName",
                                           "GICS Industry" = "GICSIndustryName",
                                           "SecurityType" = "SecurityType",
-                                          "Market Cap" = "MktCap"), 
-                                        selected = "Region", width = "75%")
+                                          "Asset Class" = "AssetClass",
+                                          "Instrument" = "Instrument",
+                                          "Issuer" = "Issuer",
+                                          "Market Cap" = "MktCap",
+                                          "Rating" = "Rating",
+                                          "IG/HY" = "RatingGrp"), 
+                                        selected = "Region", width = "60%")
                     )
                     #)
                     ),
@@ -64,7 +69,8 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                tableOutput("mVaR")),
                       tabPanel("Fundamentals",
                                plotlyOutput("fundChart", inline = F, height = "130%"),
-                               plotlyOutput("quintiles", inline = F, height = "130%"))
+                               plotlyOutput("quintiles", inline = F, height = "130%")),
+                      tabPanel("Ratings")
                     )
                   )
                 #)
@@ -81,31 +87,31 @@ server <- function(input, output, session) {
                    "from completely removing the position.")))
   
   output$topContr <- renderTable({
-    fn_topCont(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+    fn_topCont(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
     }, width = "100%")
   
   output$actRiskSplit <- renderPlot({
-    fn_actRiskSplit(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date, input$Split)
+    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date, input$Split)
   })
   
   output$histRisk <- renderPlot({
-    fn_topStats(delFrame$Delegate[delFrame$delName == input$Delegate])[1]
+    fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[1]
   })
   
   output$histFac <- renderPlot({
-    fn_topStats(delFrame$Delegate[delFrame$delName == input$Delegate])[2]
+    fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[2]
   })
   
   output$mVaR <- renderTable({
-    fn_mVaR(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+    fn_mVaR(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
   }, width = "100%")
   
   output$fundChart <- renderPlotly({
-    fn_fundamentals(delFrame$Delegate[delFrame$delName == input$Delegate])
+    fn_fundamentals(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])
   })
   
   output$quintiles <- renderPlotly({
-    fn_quintiles(delFrame$Delegate[delFrame$delName == input$Delegate], input$Date)
+    fn_quintiles(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
   })
 }
 
