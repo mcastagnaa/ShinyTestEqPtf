@@ -1,4 +1,4 @@
-writeLines("loading fn_actRiskByRegion.R")
+writeLines("loading fn_actRiskSplit.R")
 
 # delCode = 697132
 # date = as.Date("2020-10-15")

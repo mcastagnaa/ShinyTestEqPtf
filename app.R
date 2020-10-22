@@ -15,44 +15,46 @@ source("fn_topCont.R")
 source("fn_mVaR.R")
 source("fn_fundamentals.R")
 source("fn_quintiles.R")
+source("fn_topTable.R")
 
 ################################################
 
 ui <- fluidPage(theme=shinytheme("cosmo"),
-                # absolutePanel(id = "choices", 
-                #               titlePanel("Example of interactive dashboard"),
-                #               top = 0, left = "10%", height = "30%", width = "100%", fixed = T,
-                    fluidRow(
-                      column(3, 
-                             selectInput("Delegate", "Select the portfolio", dropDownSel$Name, multiple = F,
-                                         selected = "Equity EU Income"),
-                    ),
-                    column(2,
-                           dateInput("Date", "Select the date", value = max(dataSet$ReportDate), format = "dd-M-yy")
-                    ),
-                     column(3, 
-                           radioButtons("Split", "Grouping by:",
-                                        c("Region" = "Region",
-                                          "Country" = "CtryName",
-                                          "Developed" = "MSCI_DC",
-                                          "CCY" = "Crncy",
-                                          "Sector" = "Sector",
-                                          "GICS Sector" = "GICSSectorName",
-                                          "GICS Industry" = "GICSIndustryName",
-                                          "SecurityType" = "SecurityType",
-                                          "Asset Class" = "AssetClass",
-                                          "Instrument" = "Instrument",
-                                          "Issuer" = "Issuer",
-                                          "Market Cap" = "MktCap",
-                                          "Rating" = "Rating",
-                                          "IG/HY" = "RatingGrp"), 
-                                        selected = "Region", width = "60%")
-                    )
-                    #)
-                    ),
-                
-                # absolutePanel(id = "main",
-                #               top = "40%", height = "80%", width = "100%", fixed = F,
+                titlePanel("Example of interactive dashboard"),
+                h4("Please select either a Friday or the last available date"),
+                h5(tags$em("Equity EU Income has all the dates")),
+                hr(),
+                fluidRow(column(8,
+                                fluidRow(
+                                  column(8, 
+                                         selectInput("Delegate", "Portfolio:", dropDownSel$Name, multiple = F,
+                                                     selected = "Equity EU Income"),
+                                         verbatimTextOutput("topTable")
+                                  ),
+                                  column(4,
+                                         dateInput("Date", "Date:", 
+                                                   value = max(dataSet$ReportDate), 
+                                                   format = "dd-M-yy",
+                                                   weekstart = 1)
+                                  )
+                                )),
+                         column(4, 
+                                radioButtons("Split", "Group by:",
+                                             c("Region" = "Region",
+                                               "Country" = "CtryName",
+                                               "Developed" = "MSCI_DC",
+                                               "CCY" = "Crncy",
+                                               "Sector" = "Sector",
+                                               "GICS Sector" = "GICSSectorName",
+                                               "GICS Industry" = "GICSIndustryName",
+                                               "SecurityType" = "SecurityType",
+                                               "Asset Class" = "AssetClass",
+                                               "Instrument" = "Instrument",
+                                               "Issuer" = "Issuer",
+                                               "Market Cap" = "MktCap",
+                                               "Rating" = "Rating",
+                                               "IG/HY" = "RatingGrp"), 
+                                             selected = "Region", width = "60%"))),
                   mainPanel(
                     tabsetPanel(
                       type = "tabs",
@@ -64,27 +66,33 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                plotOutput("histRisk"),
                                plotOutput("histFac")),
                       tabPanel("Marginal VaR",
-                               uiOutput("mVaR1"),
-                               uiOutput("mVaR2"),
+                               p(strong("MarginalVaRMCPort"), "measures the change in total VaR",
+                                      "from taking an additional dollar of exposure (x100)",
+                                      "to a given security."),
+                               p(strong("PartialVaRMCPort"), "measures the change in total VaR",
+                                      "from completely removing the position."),
                                tableOutput("mVaR")),
                       tabPanel("Fundamentals",
                                plotlyOutput("fundChart", inline = F, height = "130%"),
-                               plotlyOutput("quintiles", inline = F, height = "130%")),
-                      tabPanel("Ratings")
+                               plotlyOutput("quintiles", inline = F, height = "130%"))
                     )
                   )
                 #)
 )
 
 server <- function(input, output, session) {
-  #output$test <- renderText(input$Split)
+  # output$test <- renderText(
+  #   max(dataSet$ReportDate[dataSet$Delegate == dropDownSel$DelCode[dropDownSel$Name == input$Delegate]])
+  # )
   
-  output$mVaR1 <- renderText(HTML(paste("<b>MarginalVaRMCPort</b> measures the change in total VaR",
-                   "from taking an additional dollar of exposure (x100)",
-                   "to a given security.")))
-  
-  output$mVaR2 <- renderText(HTML(paste("<b>PartialVaRMCPort</b> measures the change in total VaR",
-                   "from completely removing the position.")))
+  observeEvent(input$Delegate, {
+    updateDateInput(session, "Date", 
+                    value = input$Date,
+                    min = min(dataSet$ReportDate[dataSet$Delegate == 
+                                                   dropDownSel$DelCode[dropDownSel$Name == input$Delegate]]),
+                    max = max(dataSet$ReportDate[dataSet$Delegate ==
+                                                   dropDownSel$DelCode[dropDownSel$Name == input$Delegate]]))
+   }) 
   
   output$topContr <- renderTable({
     fn_topCont(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
@@ -112,6 +120,10 @@ server <- function(input, output, session) {
   
   output$quintiles <- renderPlotly({
     fn_quintiles(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
+  })
+  
+  output$topTable <- renderPrint({ 
+    fn_topTable(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
   })
 }
 

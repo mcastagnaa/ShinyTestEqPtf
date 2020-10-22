@@ -19,7 +19,8 @@ dataSet <- holdSet %>%
   select(-starts_with("update"))
 
 dropDownSel <- delFrame %>%
-  filter(MainSleeve == 1) %>%
+  filter(MainSleeve == 1,
+         !is.na(StartDate)) %>%
   mutate(Name = paste(AssetClass, Region, Style)) %>%
   arrange(AssetClass) %>%
   select(Name, DelCode)
