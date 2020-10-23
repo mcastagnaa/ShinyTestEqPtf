@@ -19,24 +19,37 @@ source("fn_topTable.R")
 
 ################################################
 
-ui <- fluidPage(theme=shinytheme("cosmo"),
+ui <- fluidPage(theme=shinytheme("lumen"),
                 titlePanel("Example of interactive dashboard"),
                 h4("Please select either a Friday or the last available date"),
                 h5(tags$em("Equity EU Income has all the dates")),
                 hr(),
                 fluidRow(column(8,
                                 fluidRow(
-                                  column(8, 
+                                  column(4, 
                                          selectInput("Delegate", "Portfolio:", dropDownSel$Name, multiple = F,
                                                      selected = "Equity EU Income"),
-                                         verbatimTextOutput("topTable")
+                                         offset = 1
                                   ),
-                                  column(4,
+                                  column(5,
                                          dateInput("Date", "Date:", 
                                                    value = max(dataSet$ReportDate), 
                                                    format = "dd-M-yy",
-                                                   weekstart = 1)
+                                                   weekstart = 1),
+                                         offset = 2
                                   )
+                                ),
+                                fluidRow(
+                                  column(5,
+                                         h3("Basic metrics"),
+                                         p(em("TotalRisk"),"and", em("VaRMC"), "are annualized, forward looking from Bloomberg regional model MAC2."),
+                                         p(em("TotalRisk Diff"),"is the annualized expected Tracking Error."),
+                                         p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
+                                         p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."),
+                                         offset = 1),
+                                  column(5, br(),br(),
+                                         tableOutput("topTable"),
+                                         offset = 1)
                                 )),
                          column(4, 
                                 radioButtons("Split", "Group by:",
@@ -54,7 +67,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                                "Market Cap" = "MktCap",
                                                "Rating" = "Rating",
                                                "IG/HY" = "RatingGrp"), 
-                                             selected = "Region", width = "60%"))),
+                                             selected = "Region", width = "100%"))),
                   mainPanel(
                     tabsetPanel(
                       type = "tabs",
@@ -71,13 +84,15 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                                       "to a given security."),
                                p(strong("PartialVaRMCPort"), "measures the change in total VaR",
                                       "from completely removing the position."),
-                               tableOutput("mVaR")),
+                               dataTableOutput("mVaR")),
                       tabPanel("Fundamentals",
                                plotlyOutput("fundChart", inline = F, height = "130%"),
-                               plotlyOutput("quintiles", inline = F, height = "130%"))
+                               plotlyOutput("quintiles", inline = F, height = "130%")),
+                      tabPanel("NOTES",
+                               h2("Methodological notes, data sources, criteria"),
+                               p(code("This is where all the notes about what each object represents would fit.")))
                     )
                   )
-                #)
 )
 
 server <- function(input, output, session) {
@@ -110,9 +125,9 @@ server <- function(input, output, session) {
     fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[2]
   })
   
-  output$mVaR <- renderTable({
+  output$mVaR <- renderDataTable({
     fn_mVaR(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-  }, width = "100%")
+  })
   
   output$fundChart <- renderPlotly({
     fn_fundamentals(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])
@@ -122,9 +137,9 @@ server <- function(input, output, session) {
     fn_quintiles(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
   })
   
-  output$topTable <- renderPrint({ 
+  output$topTable <- renderTable({ 
     fn_topTable(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-  })
+  }, bordered = T, spacing = "s", na = "", striped = T)
 }
 
 shinyApp(ui = ui, server = server)
