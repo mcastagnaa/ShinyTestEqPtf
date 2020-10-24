@@ -11,6 +11,7 @@ fn_topTable <- function(delCode, date) {
            MktValPort = MtkValPort,
            WgtPort, WgtBench, 
            DeltaAdjWgtPort, DeltaAdjWgtBench,
+           BetaExAntePort = BetaexantePort,
            TotalRiskPort, TotalRiskBench, TotalRiskDiff,
            VaRMCPort, VaRMCBench, VaRMCDiff) %>%
     pivot_longer(everything()) %>%

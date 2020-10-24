@@ -5,6 +5,7 @@ writeLines("Loading fn_quintiles.R")
 # var = "PB"
 
 fn_quintiles <- function(delCode, date) {
+  if(exists("chartSet")) rm(chartSet)
   for(var in c("OAD", "LOAS", "DTS", "LOASD", "YearstoMat", "YTW",
                "PE", "DivYld", "BEstPE", "BEstLTGEPS", "PB")) {
     

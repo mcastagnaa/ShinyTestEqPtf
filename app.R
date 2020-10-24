@@ -38,7 +38,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                                    weekstart = 1),
                                          offset = 2
                                   )
-                                ),
+                                ), hr(),
                                 fluidRow(
                                   column(5,
                                          h3("Basic metrics"),
@@ -47,9 +47,9 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                          p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
                                          p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."),
                                          offset = 1),
-                                  column(5, br(),br(),
+                                  column(6, br(),
                                          tableOutput("topTable"),
-                                         offset = 1)
+                                         offset = 0)
                                 )),
                          column(4, 
                                 radioButtons("Split", "Group by:",
@@ -74,6 +74,10 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                       tabPanel("Holdings details", 
                                #textOutput("test"),
                                plotOutput("actRiskSplit"),
+                               h5("List of NA lines"),
+                               tableOutput("actRiskNA"),
+                               br(),
+                               h5("List of top contributors/detractors"),
                                tableOutput("topContr")),
                       tabPanel("Top details",
                                plotOutput("histRisk"),
@@ -87,6 +91,8 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                dataTableOutput("mVaR")),
                       tabPanel("Fundamentals",
                                plotlyOutput("fundChart", inline = F, height = "130%"),
+                               br(),
+                               h4(em("Quintile buckets analysis")),
                                plotlyOutput("quintiles", inline = F, height = "130%")),
                       tabPanel("NOTES",
                                h2("Methodological notes, data sources, criteria"),
@@ -114,8 +120,15 @@ server <- function(input, output, session) {
     }, width = "100%")
   
   output$actRiskSplit <- renderPlot({
-    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date, input$Split)
+    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
+                    input$Date, input$Split)[1]
   })
+  
+  output$actRiskNA <- renderTable({
+    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
+                    input$Date, input$Split)[2]
+  })
+  
   
   output$histRisk <- renderPlot({
     fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[1]

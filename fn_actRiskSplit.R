@@ -1,22 +1,31 @@
 writeLines("loading fn_actRiskSplit.R")
 
-# delCode = 697132
-# date = as.Date("2020-10-15")
-# split = "Crncy"
+delCode = 697132
+date = as.Date("2020-10-22")
+split = "AssetClass"
 
 fn_actRiskSplit <- function(delCode, date, split) {
   
-  dataSet %>%
+  chartSetACS <- dataSet %>%
     filter(Delegate == delCode,
            ReportDate == date) %>%
     mutate(WgtPort = ifelse(IsDerivative & split == "Crncy", 0, WgtPort)) %>%
     group_by_at(split) %>%
-    summarise(Wgt = sum(WgtPort, na.rm = T),
-              actWgt = sum(WgtPort-WgtBench, na.rm = T),
-              actRiskCtb = sum(ContributionDiff, na.rm = T)) %>%
+    summarise(`A-Wgt` = sum(WgtPort, na.rm = T),
+              `B-ActiveWeight` = sum(WgtPort-WgtBench, na.rm = T),
+              `C-RelativeRiskCtb` = sum(ContributionDiff, na.rm = T)) %>%
     pivot_longer(-all_of(split), names_to = "Dimension") %>%
     mutate(value = value/100)  %>%
-    filter(value != 0.00) %>%
+    filter(value != 0.00)
+  
+  naSet <- dataSet %>%
+    filter(Delegate == delCode,
+           ReportDate == date) %>%
+    mutate(WgtPort = ifelse(IsDerivative & split == "Crncy", 0, WgtPort)) %>%
+    filter(is.na(get(split))) %>%
+    select(Name, WgtPort, WgtBench, ActRiskCtb = TotalRiskDiff)
+  
+  chartACS <- chartSetACS %>%
     ggplot(aes_string(x = as.character(split), y = "value")) +
     geom_bar(stat = "identity", position = "dodge", fill = "light green") +
     geom_text(aes(label= paste0(round(value*100, 1), "%")), size = 2.5) + #, position=position_dodge(width=1), vjust=-0.25)+
@@ -26,6 +35,8 @@ fn_actRiskSplit <- function(delCode, date, split) {
     coord_flip() +
     labs(title = paste("Split by", split, "for", date),
          x = "", y = "")
+  
+  return(list(chartACS, naSet))
 }
 
 ## possible groupings: Crncy, GICSSectorName, GICSIndustryName, Sector, Industry, 
