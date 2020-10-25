@@ -1,6 +1,6 @@
 writeLines("Loading fn_topStats.R")
 
-#delCode = 	693423
+delCode = 	693423
 
 fn_topStats <- function(delCode) {
   actExp <- dataSet %>%
@@ -24,7 +24,13 @@ fn_topStats <- function(delCode) {
            object = case_when(grepl("Diff", name) ~ "Diff",
                               grepl("Port", name) ~ "Port",
                               grepl("Bench", name) ~ "Bench")) %>%
-    bind_rows(actExp) 
+    bind_rows(actExp) %>%
+    mutate(group = recode(group,
+                          ActiveExp = "A-Active weight",
+                          TotalRisk = "B-Risk",
+                          TotalRiskDiff = "C-Expected TE",
+                          VaRMC = "D-VaR"))
+  
   
   chartTop <- ggplot(chartTopData, aes(x = ReportDate, y = value, color = object)) +
     geom_line() +

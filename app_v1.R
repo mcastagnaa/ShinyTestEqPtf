@@ -1,3 +1,5 @@
+#### Full page no side panel
+
 library(shiny)
 library(shinythemes)
 library(dplyr)
@@ -20,57 +22,58 @@ source("fn_topTable.R")
 ################################################
 
 ui <- fluidPage(theme=shinytheme("lumen"),
-                fluidRow(
-                  column(2,br(),
-                         img(src = "logo.png", width = "100")),
-                  column(10,
-                         titlePanel("Example of interactive dashboard"),
-                         h4("Please select either a Friday or the last available date"),
-                         h5(tags$em("Equity EU Income has all the dates")),
-                         hr())
-                ),
-                sidebarLayout(
-                  sidebarPanel = sidebarPanel(
-                    selectInput("Delegate", "Portfolio:", dropDownSel$Name, multiple = F,
-                                selected = "Equity EU Income"),
-                    hr(),
-                    dateInput("Date", "Date:", 
-                              value = max(dataSet$ReportDate), 
-                              format = "dd-M-yy",
-                              weekstart = 1),
-                    hr(),
-                    radioButtons("Split", "Group by:",
-                                 c("Region" = "Region",
-                                   "Country" = "CtryName",
-                                   "Developed" = "MSCI_DC",
-                                   "CCY" = "Crncy",
-                                   "Sector" = "Sector",
-                                   "GICS Sector" = "GICSSectorName",
-                                   "GICS Industry" = "GICSIndustryName",
-                                   "SecurityType" = "SecurityType",
-                                   "Asset Class" = "AssetClass",
-                                   "Instrument" = "Instrument",
-                                   "Issuer" = "Issuer",
-                                   "Market Cap" = "MktCap",
-                                   "Rating" = "Rating",
-                                   "IG/HY" = "RatingGrp"), 
-                                 selected = "Region", width = "100%")),
-                  #), 
-                mainPanel = mainPanel(
-                    fluidRow(
-                      column(5,
-                             h3("Basic metrics"),
-                             p(em("TotalRisk"),"and", em("VaRMC"), "are annualized, forward looking from Bloomberg regional model MAC2."),
-                             p(em("TotalRisk Diff"),"is the annualized expected Tracking Error."),
-                             p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
-                             p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."),
-                             offset = 1),
-                      column(6, br(),
-                             tableOutput("topTable"),
-                             offset = 0)),
+                titlePanel("Example of interactive dashboard"),
+                h4("Please select either a Friday or the last available date"),
+                h5(tags$em("Equity EU Income has all the dates")),
+                hr(),
+                fluidRow(column(8,
+                                fluidRow(
+                                  column(4, 
+                                         selectInput("Delegate", "Portfolio:", dropDownSel$Name, multiple = F,
+                                                     selected = "Equity EU Income"),
+                                         offset = 1
+                                  ),
+                                  column(5,
+                                         dateInput("Date", "Date:", 
+                                                   value = max(dataSet$ReportDate), 
+                                                   format = "dd-M-yy",
+                                                   weekstart = 1),
+                                         offset = 2
+                                  )
+                                ), hr(),
+                                fluidRow(
+                                  column(5,
+                                         h3("Basic metrics"),
+                                         p(em("TotalRisk"),"and", em("VaRMC"), "are annualized, forward looking from Bloomberg regional model MAC2."),
+                                         p(em("TotalRisk Diff"),"is the annualized expected Tracking Error."),
+                                         p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
+                                         p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."),
+                                         offset = 1),
+                                  column(6, br(),
+                                         tableOutput("topTable"),
+                                         offset = 0)
+                                )),
+                         column(4, 
+                                radioButtons("Split", "Group by:",
+                                             c("Region" = "Region",
+                                               "Country" = "CtryName",
+                                               "Developed" = "MSCI_DC",
+                                               "CCY" = "Crncy",
+                                               "Sector" = "Sector",
+                                               "GICS Sector" = "GICSSectorName",
+                                               "GICS Industry" = "GICSIndustryName",
+                                               "SecurityType" = "SecurityType",
+                                               "Asset Class" = "AssetClass",
+                                               "Instrument" = "Instrument",
+                                               "Issuer" = "Issuer",
+                                               "Market Cap" = "MktCap",
+                                               "Rating" = "Rating",
+                                               "IG/HY" = "RatingGrp"), 
+                                             selected = "Region", width = "100%"))),
+                  mainPanel(
                     tabsetPanel(
                       type = "tabs",
-                      tabPanel("Holdings details",
+                      tabPanel("Holdings details", 
                                #textOutput("test"),
                                plotOutput("actRiskSplit"),
                                h5("List of NA lines"),
@@ -78,15 +81,15 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                br(),
                                h5("List of top contributors/detractors"),
                                tableOutput("topContr")),
-                      tabPanel("Ex-ante risk details",
+                      tabPanel("Top details",
                                plotOutput("histRisk"),
                                plotOutput("histFac")),
                       tabPanel("Marginal VaR",
                                p(strong("MarginalVaRMCPort"), "measures the change in total VaR",
-                                 "from taking an additional dollar of exposure (x100)",
-                                 "to a given security."),
+                                      "from taking an additional dollar of exposure (x100)",
+                                      "to a given security."),
                                p(strong("PartialVaRMCPort"), "measures the change in total VaR",
-                                 "from completely removing the position."),
+                                      "from completely removing the position."),
                                dataTableOutput("mVaR")),
                       tabPanel("Fundamentals",
                                plotlyOutput("fundChart", inline = F, height = "130%"),
@@ -97,8 +100,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                h2("Methodological notes, data sources, criteria"),
                                p(code("This is where all the notes about what each object represents would fit.")))
                     )
-                    )
-)
+                  )
 )
 
 server <- function(input, output, session) {
