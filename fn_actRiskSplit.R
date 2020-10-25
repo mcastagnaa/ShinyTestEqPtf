@@ -23,7 +23,8 @@ fn_actRiskSplit <- function(delCode, date, split) {
            ReportDate == date) %>%
     mutate(WgtPort = ifelse(IsDerivative & split == "Crncy", 0, WgtPort)) %>%
     filter(is.na(get(split))) %>%
-    select(Name, WgtPort, WgtBench, ActRiskCtb = TotalRiskDiff)
+    select(Name, WgtPort, WgtBench, ActRiskCtb = ContributionDiff) %>%
+    mutate(ActRiskCtb = round(ActRiskCtb * 100,2))
   
   chartACS <- chartSetACS %>%
     ggplot(aes_string(x = as.character(split), y = "value")) +
