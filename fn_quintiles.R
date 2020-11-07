@@ -1,8 +1,8 @@
 writeLines("Loading fn_quintiles.R")
 
-# delCode = 	693423
-# date = '2020-10-15'
-# var = "PB"
+delCode = 	693423
+date = '2020-11-06'
+var = "DivYld"
 
 fn_quintiles <- function(delCode, date) {
   if(exists("chartSet")) rm(chartSet)
@@ -17,7 +17,7 @@ fn_quintiles <- function(delCode, date) {
           select(Name, WgtPort, WgtBench, ContributionDiff, paste0(var, "Bench"), paste0(var, "Port")) %>%
           mutate(variable = ifelse(.[[5]] == 0, .[[6]], .[[5]]),
                  Quintile = cut(variable, 
-                                breaks = quantile(variable, probs=seq(0,1, by= 0.2), na.rm = T), 
+                                breaks = unique(quantile(variable, probs=seq(0, 1, by= 0.2), na.rm = T)), 
                                 include.lowest = TRUE))
     },
     error = function(Err) {return(NULL)})

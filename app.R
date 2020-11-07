@@ -10,6 +10,7 @@ rm(list = ls())
 ### SETUP ######################################
 source("datamanagement.R")
 source("fn_actRiskSplit.R")
+source("fn_HstRiskSplit.R")
 source("fn_topStats.R")
 source("fn_topCont.R")
 source("fn_mVaR.R")
@@ -73,10 +74,12 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                       tabPanel("Holdings details",
                                #textOutput("test"),
                                plotOutput("actRiskSplit"),
-                               h5("List of NA lines"),
+                               h4("List of NA lines"),
                                tableOutput("actRiskNA"),
                                br(),
-                               h5("List of top contributors/detractors"),
+                               plotOutput("hstRiskSplit"),
+                               br(),
+                               h4("List of top contributors/detractors"),
                                tableOutput("topContr")),
                       tabPanel("Ex-ante risk details",
                                plotOutput("histRisk"),
@@ -122,6 +125,10 @@ server <- function(input, output, session) {
   output$actRiskSplit <- renderPlot({
     fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
                     input$Date, input$Split)[1]
+  })
+  
+  output$hstRiskSplit <- renderPlot({
+    fn_HstRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Split)
   })
   
   output$actRiskNA <- renderTable({
