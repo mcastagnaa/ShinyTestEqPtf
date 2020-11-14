@@ -26,7 +26,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                          img(src = "logo.png", width = "100")),
                   column(10,
                          titlePanel("Example of interactive dashboard"),
-                         h4("Please select either a Friday or the last available date"),
+                         h4("Please select either a Thursday or the last available date"),
                          h5(tags$em("Equity EU Income has all the dates")),
                          hr())
                 ),
