@@ -17,6 +17,7 @@ source("fn_mVaR.R")
 source("fn_fundamentals.R")
 source("fn_quintiles.R")
 source("fn_topTable.R")
+source("fn_MktVal.R")
 
 ################################################
 
@@ -55,16 +56,12 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                    "Market Cap" = "MktCap",
                                    "Rating" = "Rating",
                                    "IG/HY" = "RatingGrp"), 
-                                 selected = "Region", width = "100%")),
+                                 selected = "Region", width = "100px")),
                   #), 
                 mainPanel = mainPanel(
                     fluidRow(
                       column(5,
-                             h3("Basic metrics"),
-                             p(em("TotalRisk"),"and", em("VaRMC"), "are annualized, forward looking from Bloomberg regional model MAC2."),
-                             p(em("TotalRisk Diff"),"is the annualized expected Tracking Error."),
-                             p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
-                             p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."),
+                             plotOutput("mktVal", inline = F),
                              offset = 1),
                       column(6, br(),
                              tableOutput("topTable"),
@@ -98,7 +95,12 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                plotlyOutput("quintiles", inline = F, height = "130%")),
                       tabPanel("NOTES",
                                h2("Methodological notes, data sources, criteria"),
-                               p(code("This is where all the notes about what each object represents would fit.")))
+                               #p(code("This is where all the notes about what each object represents would fit.")),
+                               h3("Basic metrics"),
+                               p(em("TotalRisk"),"and", em("VaRMC"), "are annualized, forward looking from Bloomberg regional model MAC2."),
+                               p(em("TotalRisk Diff"),"is the annualized expected Tracking Error."),
+                               p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
+                               p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."))
                     )
                     )
 )
@@ -136,6 +138,9 @@ server <- function(input, output, session) {
                     input$Date, input$Split)[2]
   })
   
+  output$mktVal <- renderPlot({
+    fn_mktVal(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])
+  }, height = 300)
   
   output$histRisk <- renderPlot({
     fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[1]
