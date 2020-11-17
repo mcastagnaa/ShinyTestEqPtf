@@ -56,8 +56,8 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                    "Market Cap" = "MktCap",
                                    "Rating" = "Rating",
                                    "IG/HY" = "RatingGrp"), 
-                                 selected = "Region", width = "100px")),
-                  #), 
+                                 selected = "Region"),
+                  width = 3), 
                 mainPanel = mainPanel(
                     fluidRow(
                       column(5,
@@ -102,7 +102,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                p(em("DelCode"), "(no decimals!) is the portfolio code on Bloomberg."),
                                p(em("MktVal"), "is the value of the money managed by that sleeve for the main class."))
                     )
-                    )
+                    , width = 9)
 )
 )
 
