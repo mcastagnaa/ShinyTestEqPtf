@@ -20,6 +20,7 @@ source("fn_topTable.R")
 source("fn_MktVal.R")
 source("fn_scenarios.R")
 source("fn_factors.R")
+source("fn_factNonFact.R")
 
 ################################################
 
@@ -73,6 +74,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                       tabPanel("Holdings details",
                                #textOutput("test"),
                                plotOutput("actRiskSplit"),
+                               plotOutput("factNonFact"),
                                h4("List of NA lines"),
                                tableOutput("actRiskNA"),
                                br(),
@@ -130,6 +132,8 @@ server <- function(input, output, session) {
                                  width = "100%")
   output$actRiskSplit <- renderPlot(fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
                                                     input$Date, input$Split)[1])
+  output$factNonFact <- renderPlot(fn_factNonFact(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
+                                                  input$Date, input$Split))
   output$hstRiskSplit <- renderPlot(fn_HstRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Split))
   output$actRiskNA <- renderTable(fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
                                                   input$Date, input$Split)[2])
