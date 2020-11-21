@@ -1,6 +1,8 @@
 writeLines("Running datamanagement.R")
 
 load("datadump.Rda")
+load("datadump_fact.Rda")
+load("datadump_scen.Rda")
 
 derivTypes <- c("Bond Futures", "Options on Bond Futures")
 
@@ -93,4 +95,8 @@ dataSet <- dataSet %>%
                                Rating %in% c("BB", "B", "CCC", "CC", "C", "D") ~ "HY",
                                TRUE ~ "NR"))
 
-
+### SCENARIOS ##############################
+scenSet <- scenSet %>%
+  left_join(scenIDs, by = c("ScenID"="ID")) %>%
+  mutate(scenName = gsub(" with propagation", "", scenName))
+  

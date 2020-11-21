@@ -18,6 +18,8 @@ source("fn_fundamentals.R")
 source("fn_quintiles.R")
 source("fn_topTable.R")
 source("fn_MktVal.R")
+source("fn_scenarios.R")
+source("fn_factors.R")
 
 ################################################
 
@@ -80,7 +82,10 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                tableOutput("topContr")),
                       tabPanel("Ex-ante risk details",
                                plotOutput("histRisk"),
-                               plotOutput("histFac")),
+                               plotOutput("histFac"),
+                               hr(),
+                               h4("Individual factor contribution analysis"),
+                               dataTableOutput("factors")),
                       tabPanel("Marginal VaR",
                                p(strong("MarginalVaRMCPort"), "measures the change in total VaR",
                                  "from taking an additional dollar of exposure (x100)",
@@ -93,6 +98,9 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                br(),
                                h4(em("Quintile buckets analysis")),
                                plotlyOutput("quintiles", inline = F, height = "130%")),
+                      tabPanel("Scenarios",
+                               plotOutput("scenDate"),
+                               tableOutput("scenDes")),
                       tabPanel("NOTES",
                                h2("Methodological notes, data sources, criteria"),
                                #p(code("This is where all the notes about what each object represents would fit.")),
@@ -107,10 +115,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
 )
 
 server <- function(input, output, session) {
-  # output$test <- renderText(
-  #   max(dataSet$ReportDate[dataSet$Delegate == dropDownSel$DelCode[dropDownSel$Name == input$Delegate]])
-  # )
-  
+
   observeEvent(input$Delegate, {
     updateDateInput(session, "Date", 
                     value = input$Date,
@@ -120,51 +125,41 @@ server <- function(input, output, session) {
                                                    dropDownSel$DelCode[dropDownSel$Name == input$Delegate]]))
    }) 
   
-  output$topContr <- renderTable({
-    fn_topCont(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-    }, width = "100%")
+  ### Holdings details tab #################
+  output$topContr <- renderTable(fn_topCont(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date), 
+                                 width = "100%")
+  output$actRiskSplit <- renderPlot(fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
+                                                    input$Date, input$Split)[1])
+  output$hstRiskSplit <- renderPlot(fn_HstRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Split))
+  output$actRiskNA <- renderTable(fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
+                                                  input$Date, input$Split)[2])
   
-  output$actRiskSplit <- renderPlot({
-    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
-                    input$Date, input$Split)[1]
-  })
+  ### Top panel #############################
+  output$mktVal <- renderPlot(fn_mktVal(dropDownSel$DelCode[dropDownSel$Name == input$Delegate]), 
+                              height = 300)
+  output$topTable <- renderTable(fn_topTable(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date), 
+                                 bordered = T, spacing = "s", na = "", striped = T)
   
-  output$hstRiskSplit <- renderPlot({
-    fn_HstRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Split)
-  })
+  ### Ex-ante risk details tab #############
+  output$histRisk <- renderPlot(fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[1])
+  output$histFac <- renderPlot(fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[2])
+  output$factors <- renderDataTable(fn_factors(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date),
+                                    options = list(pageLength = 10))
   
-  output$actRiskNA <- renderTable({
-    fn_actRiskSplit(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], 
-                    input$Date, input$Split)[2]
-  })
   
-  output$mktVal <- renderPlot({
-    fn_mktVal(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])
-  }, height = 300)
+  ### mVar tab #############################
+  output$mVaR <- renderDataTable(fn_mVaR(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date))
   
-  output$histRisk <- renderPlot({
-    fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[1]
-  })
+  ### fundamentals tab #####################
+  output$fundChart <- renderPlotly(fn_fundamentals(dropDownSel$DelCode[dropDownSel$Name == input$Delegate]))
+  output$quintiles <- renderPlotly(fn_quintiles(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date))
   
-  output$histFac <- renderPlot({
-    fn_topStats(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])[2]
-  })
-  
-  output$mVaR <- renderDataTable({
-    fn_mVaR(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-  })
-  
-  output$fundChart <- renderPlotly({
-    fn_fundamentals(dropDownSel$DelCode[dropDownSel$Name == input$Delegate])
-  })
-  
-  output$quintiles <- renderPlotly({
-    fn_quintiles(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-  })
-  
-  output$topTable <- renderTable({ 
-    fn_topTable(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)
-  }, bordered = T, spacing = "s", na = "", striped = T)
+  ### scenario tab #########################
+  output$scenDate <- renderPlot(fn_scen(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)[1])
+  output$scenDes <- renderTable(fn_scen(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date)[2],
+                                striped = T,
+                                width = "80%")
+
 }
 
 shinyApp(ui = ui, server = server)
