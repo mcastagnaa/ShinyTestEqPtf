@@ -4,21 +4,23 @@ load("datadump.Rda")
 load("datadump_fact.Rda")
 load("datadump_scen.Rda")
 
-derivTypes <- c("Bond Futures", "Options on Bond Futures")
-
-dataSet <- holdSet %>%
-  mutate(CntryRisk = ifelse(is.na(CntryRisk)|CntryRisk=="", Cntry, CntryRisk),
-         MktCap = ifelse(MarketCapPort == 0, MarketCapBench, MarketCapPort),
-         MktCap = cut(MktCap, breaks = c(0, 1500, 8500, 40000, +Inf), labels = c("Small", "Mid", "Big", "Mega")),
-         Sector = case_when(SecurityType %in% derivTypes ~ "Government", 
-                            is.na(Sector) & SecurityType == "Cash" ~ "CashFX",
-                            TRUE ~ Sector)) %>%
-  left_join(geoMap, by = c("CntryRisk" = "ISO2")) %>%
-  left_join(secTypeMap, by = "SecurityType") %>%
-  #left_join(rateCtryMap, by = )
-  mutate(MSCI_DC = ifelse(MSCI_DC==1, "DEVELOPED", "EMERGING/FRONTIER"),
-         IsDerivative = (IsDerivative == 1)) %>%
-  select(-starts_with("update"))
+# derivTypes <- c("Bond Futures", "Options on Bond Futures")
+# 
+# dataSet <- holdSet %>%
+#   mutate(CntryRisk = ifelse(is.na(CntryRisk)|CntryRisk=="", Cntry, CntryRisk),
+#          MktCap = ifelse(MarketCapPort == 0, MarketCapBench, MarketCapPort),
+#          MktCap = cut(MktCap, breaks = c(0, 1500, 8500, 40000, +Inf), labels = c("Small", "Mid", "Big", "Mega")),
+#          Sector = case_when(SecurityType %in% derivTypes ~ "Government", 
+#                             is.na(Sector) & SecurityType == "Cash" ~ "CashFX",
+#                             TRUE ~ Sector)) %>%
+#   left_join(geoMap, by = c("CntryRisk" = "ISO2")) %>%
+#   left_join(secTypeMap, by = "SecurityType") %>%
+#   #left_join(rateCtryMap, by = )
+#   mutate(MSCI_DC = ifelse(MSCI_DC==1, "DEVELOPED", "EMERGING/FRONTIER"),
+#          IsDerivative = (IsDerivative == 1)) %>%
+#   select(-starts_with("update"))
+# 
+# rm(holdSet)
 
 dropDownSel <- delFrame %>%
   filter(MainSleeve == 1,
@@ -27,8 +29,6 @@ dropDownSel <- delFrame %>%
   arrange(AssetClass) %>%
   select(Name, DelCode)
   
-rm(holdSet)
-
 factMap <- data.frame(Factors = c("Factor", "NonFactor", 
                                   "Equity","FixedIncome","Commodity", "Currency", "Alt", 
                                   "Spread", "YC",
