@@ -7,6 +7,8 @@ library(plotly)
 
 rm(list = ls())
 
+options(dplyr.summarise.inform = FALSE)
+
 ### SETUP ######################################
 source("datamanagement.R")
 source("fn_actRiskSplit.R")
@@ -21,8 +23,11 @@ source("fn_MktVal.R")
 source("fn_scenarios.R")
 source("fn_factors.R")
 source("fn_factNonFact.R")
+source("fn_LineCounts.R")
+source("fn_DivBnft.R")
 
 ################################################
+
 
 ui <- fluidPage(theme=shinytheme("lumen"),
                 fluidRow(
@@ -37,7 +42,7 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                 sidebarLayout(
                   sidebarPanel = sidebarPanel(
                     selectInput("Delegate", "Portfolio:", dropDownSel$Name, multiple = F,
-                                selected = "Equity EU Income"),
+                                selected = "Equity GL Income"),
                     hr(),
                     dateInput("Date", "Date:", 
                               value = max(dataSet$ReportDate), 
@@ -88,6 +93,15 @@ ui <- fluidPage(theme=shinytheme("lumen"),
                                hr(),
                                h4("Individual factor contribution analysis"),
                                dataTableOutput("factors")),
+                      tabPanel("Diversification",
+                               plotOutput("histLineC"),
+                               plotOutput("histDivBnft"),
+                               hr(),
+                               h4("Individual lines correlation analysis"),
+                               p("Example for", strong("US income portfolio, as of 26-Feb-2021 (Yahoo! finance as data source)"),
+                                 "calculated over 52 weekly relative returns"),
+                               p(""),
+                               plotOutput("corrChart_expl")),
                       tabPanel("Marginal VaR",
                                p(strong("MarginalVaRMCPort"), "measures the change in total VaR",
                                  "from taking an additional dollar of exposure (x100)",
@@ -150,7 +164,10 @@ server <- function(input, output, session) {
   output$factors <- renderDataTable(fn_factors(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date),
                                     options = list(pageLength = 10))
   
-  
+  ### Diversification #############
+  output$histLineC <- renderPlot(fn_LineCounts(dropDownSel$DelCode[dropDownSel$Name == input$Delegate]))
+  output$histDivBnft <- renderPlot(fn_DivBnft(dropDownSel$DelCode[dropDownSel$Name == input$Delegate]))
+    
   ### mVar tab #############################
   output$mVaR <- renderDataTable(fn_mVaR(dropDownSel$DelCode[dropDownSel$Name == input$Delegate], input$Date))
   

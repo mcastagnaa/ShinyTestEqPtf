@@ -39,6 +39,7 @@ factMap <- data.frame(Factors = c("Factor", "NonFactor",
 
 ### RATINGs ###################################
 dataSet <- dataSet %>%
+  #filter(ReportDate > "2020-06-30") %>%
   mutate(RatingPort = as.character(RatingPort),
          RatingBench = as.character(RatingBench)) %>%
   mutate(Rating = case_when(is.na(RatingPort) & is.na(RatingBench) ~ "NR",
