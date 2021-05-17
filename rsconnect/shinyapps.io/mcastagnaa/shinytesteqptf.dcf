@@ -5,6 +5,7 @@ account: mcastagnaa
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2986089
-bundleId: 3780586
+bundleId: 4608425
 url: https://mcastagnaa.shinyapps.io/shinytesteqptf/
-when: 1603644722.65489
+when: 1621274884.40408
+lastSyncTime: 1621274884.4041

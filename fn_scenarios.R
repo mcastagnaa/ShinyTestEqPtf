@@ -20,7 +20,8 @@ fn_scen <- function(delCode, repDate) {
     geom_text(data = chartData,
               aes(label = round(value*100, 2)), 
               position = position_dodge(width = 1),
-              vjust = 0, hjust = 0, size = 2.5) +
+              vjust = 0, hjust = 0, size = 2.5,
+              color = "dark grey") +
     facet_wrap(~facet, scales = "free_x") +
     viridis::scale_fill_viridis(discrete = T) +
     scale_y_continuous(label = scales::percent) +

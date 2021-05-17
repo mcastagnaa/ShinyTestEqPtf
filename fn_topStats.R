@@ -35,7 +35,8 @@ fn_topStats <- function(delCode) {
   chartTop <- ggplot(chartTopData, aes(x = ReportDate, y = value, color = object)) +
     geom_line() +
     geom_text(data = chartTopData[chartTopData$ReportDate == max(chartTopData$ReportDate),],
-              aes(label = paste0(round(value*100, 1), "%")), vjust = -0.3, size = 2.5) +
+              aes(label = paste0(round(value*100, 1), "%")), vjust = -0.3, size = 2.5, 
+              color = "dark grey") +
     facet_wrap(~group,scales = "free_y") +
     viridis::scale_color_viridis(discrete = T) +
     scale_y_continuous(label = scales::percent) +
@@ -70,4 +71,4 @@ fn_topStats <- function(delCode) {
     return(list(chartTop, chartFac))
 }
 
-topSet$Factors
+#topSet$Factors
