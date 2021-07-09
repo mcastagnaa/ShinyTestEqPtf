@@ -7,3 +7,5 @@ ShinyTestEqPtf.Rproj
 datadump.Rda
 deploy.R
 getDataDONTWORK.R
+datadump_fact.Rda
+datadump_scen.Rda

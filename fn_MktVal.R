@@ -10,7 +10,7 @@ fn_mktVal <- function(delCode) {
       ggplot(aes(x = ReportDate, y = MktVal)) +
       geom_line(color = "Blue") +
       theme_bw() +
-      labs(title = "Sleeve market value (EUR mn)",
+      labs(title = "Sleeve AUM (EUR mn)",
            x = "", y = "")
     
   return(mktVal_H)
