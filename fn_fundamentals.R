@@ -7,7 +7,7 @@ fn_fundamentals <- function(delCode) {
     filter(Delegate == delCode,
            ReportDate > as.Date("2020-03-27")) %>%
     select(OADPort, OADBench, LOASPort, LOASBench, DTSPort, DTSBench,LOASDPort, LOASDBench,
-           YearstoMatPort, YearstoMatBench, YTWPort,YTWBench, 
+           YearstoMatPort, YearstoMatBench, YTWPort,YTWBench, BetaexantePort,
            PEPort, PEBench, DivYldPort, DivYldBench, BEstPEPort, BEstPEBench,
            BEstLTGEPSPort, BEstLTGEPSBench, PBPort, PBBench, 
            ReportDate) %>%
