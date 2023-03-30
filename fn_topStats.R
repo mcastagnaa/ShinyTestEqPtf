@@ -1,11 +1,15 @@
 writeLines("Loading fn_topStats.R")
 
-delCode = 	693423
+#delCode = 	701879
 
 fn_topStats <- function(delCode) {
   actExp <- dataSet %>%
     filter(Delegate == delCode) %>%
-    mutate(actExp = abs(WgtPort-WgtBench)/2) %>%
+    filter(ReportDate == '2023-03-20') %>%
+    select(ReportDate, ID059, WgtPort, WgtBench) %>%
+    replace(is.na(.), 0) %>%
+    group_by(ReportDate, ID059) %>%
+    summarise(actExp = abs(sum(WgtPort)-sum(WgtBench))/2) %>%
     group_by(ReportDate) %>%
     summarise(value = sum(actExp, na.rm = T)/100) %>%
     mutate(name = "ActiveExpDiff", 

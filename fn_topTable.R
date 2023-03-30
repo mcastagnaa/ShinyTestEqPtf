@@ -1,14 +1,14 @@
 writeLines("loading fn_topTable.R")
 
 delCode = 697132
-date = as.Date("2020-10-20")
+date = as.Date("2023-03-20")
 
 fn_topTable <- function(delCode, date) {
   topSet %>%
     filter(Delegate == delCode, 
            ReportDate == date) %>%
-    select(DelCodePort = Delegate,
-           MktValPort = MtkValPort,
+    select(#DelCodePort = Delegate,
+           MktValPort,
            WgtPort, WgtBench, 
            DeltaAdjWgtPort, DeltaAdjWgtBench,
            BetaExAntePort = BetaexantePort,

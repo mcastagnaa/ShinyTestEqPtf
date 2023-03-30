@@ -6,7 +6,7 @@ fn_mktVal <- function(delCode) {
   
     mktVal_H <- topSet %>%
       filter(Delegate == delCode) %>%
-      mutate(MktVal = round(MtkValPort/1000000,2)) %>%
+      mutate(MktVal = round(MktValPort/1000000,2)) %>%
       ggplot(aes(x = ReportDate, y = MktVal)) +
       geom_line(color = "Blue") +
       theme_bw() +
