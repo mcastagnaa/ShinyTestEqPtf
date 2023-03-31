@@ -1,15 +1,22 @@
 writeLines("loading fn_actRiskSplit.R")
 
-delCode = 697132
-date = as.Date("2020-10-22")
-split = "AssetClass"
+delCode = 701878
+date = as.Date("2023-03-29")
+split = "GICSSectorName"
 
 fn_actRiskSplit <- function(delCode, date, split) {
   
-  chartSetACS <- dataSet %>%
+  thisDataSet <- dataSet %>%
     filter(Delegate == delCode,
            ReportDate == date) %>%
     mutate(WgtPort = ifelse(IsDerivative & split == "Crncy", 0, WgtPort)) %>%
+    group_by_at(c("ID059", "Name", split)) %>%
+    summarise(WgtPort = sum(WgtPort, na.rm = T),
+              WgtBench = sum(WgtBench, na.rm = T),
+              ContributionDiff = sum(ContributionDiff, na.rm = T)) %>%
+    ungroup()
+  
+  chartSetACS <- thisDataSet %>%
     group_by_at(split) %>%
     summarise(`A-Wgt` = sum(WgtPort, na.rm = T),
               `B-ActiveWeight` = sum(WgtPort-WgtBench, na.rm = T),
@@ -18,10 +25,7 @@ fn_actRiskSplit <- function(delCode, date, split) {
     mutate(value = value/100)  %>%
     filter(value != 0.00)
   
-  naSet <- dataSet %>%
-    filter(Delegate == delCode,
-           ReportDate == date) %>%
-    mutate(WgtPort = ifelse(IsDerivative & split == "Crncy", 0, WgtPort)) %>%
+  naSet <- thisDataSet %>%
     filter(is.na(get(split))) %>%
     select(Name, WgtPort, WgtBench, ActRiskCtb = ContributionDiff) %>%
     mutate(ActRiskCtb = round(ActRiskCtb,2))
