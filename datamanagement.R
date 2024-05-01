@@ -1,8 +1,19 @@
 writeLines("Running datamanagement.R")
 
+if(readline("Is this in MIO premises (Yes/Anything)? ") == "Yes") {
+  userName <- Sys.getenv("USERNAME")
+  mapsFolder <-  paste0("C:/Users/", userName, "/Mediolanum International Funds/Performance Team - Documents/Stuff/")  
+  rm(userName)
+  
+  file.copy(paste0(mapsFolder, "datadump.Rda"), to = ".", overwrite = T)
+}
+
 load("datadump.Rda")
 #load("datadump_fact.Rda")
 #load("datadump_scen.Rda")
+
+dataSet <- dataSet %>%
+  mutate(Crncy = toupper(Crncy))
 
 # # derivTypes <- c("Bond Futures", "Options on Bond Futures")
 # # 

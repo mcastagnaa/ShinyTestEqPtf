@@ -1,8 +1,8 @@
 writeLines("loading fn_actRiskSplit.R")
 
-delCode = 701878
-date = as.Date("2023-03-29")
-split = "GICSSectorName"
+# delCode = 701878
+# date = as.Date("2023-03-29")
+# split = "GICSSectorName"
 
 fn_actRiskSplit <- function(delCode, date, split) {
   
